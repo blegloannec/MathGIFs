@@ -22,13 +22,15 @@ def julia_img(c, size=500, iterations=50):
     return Img
 
 def julia_anim(c, frames=150):
-    os.system('rm -f /tmp/frame*.gif')
+    os.system('rm /tmp/frame*.gif')
     for a in range(frames):
         ca = c * complex(cos(2*pi*a/frames),sin(2*pi*a/frames))
         Img = julia_img(ca)
-        Img.save('/tmp/frame%03d.gif' % a)
+        Img.save('/tmp/frame%04d.gif' % a)
         Img.close()
-    os.system('convert -loop 0 -delay 5 /tmp/frame*.gif julia_anim.gif')
+    #os.system('convert -loop 0 -delay 5 /tmp/frame*.gif julia_anim.gif')
+    os.system('gifsicle -O3 -l -d5 /tmp/frame*.gif > julia_anim.gif')
+    os.system('rm /tmp/frame*.gif')
 
 if __name__=='__main__':
     #c = complex(-0.4,0.6)

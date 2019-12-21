@@ -33,7 +33,7 @@ void mandel_zoom(flt x, flt y, flt r, int size=400, int frames=200) {
     int it = round(100.*(1.-log(r1)/log(100)));
     PGMImage Img = mandel_img(x,y,r1,size,it);
     char fname[100];
-    sprintf(fname,"/tmp/frame%03d.pgm",a);
+    sprintf(fname,"/tmp/frame%04d.pgm",a);
     Img.save(fname);
   }
 }
