@@ -17,7 +17,7 @@ def pascal(size, depth=2, mod=2):
         L = [0]*size
         L[0] = 1
         for k in range(1,n+1):
-            L[k] = sum(T[-1][k-i] if k-1>=0 else 0 for i in range(depth)) % mod
+            L[k] = sum(T[-1][j] for j in range(max(0,k-depth+1),k+1)) % mod
         T.append(L)
     Col = [randcol() for _ in range(mod)]
     Col[0] = BackCol
@@ -33,11 +33,12 @@ if __name__=='__main__':
     size = 750
     depth = random.randint(2,1<<4)
     mod = random.randint(2,1<<4)
-    mod //= gcd(mod,depth)
+    #mod //= gcd(mod,depth)
     #while mod<2:
     #    mod = random.randint(2,1<<3)
     #    mod //= gcd(mod,depth)
     print(size, depth, mod, file=sys.stderr)
     Img = pascal(size, depth, mod)
+    #Img.save(f'pascal_{depth}_{mod}.png')
     Img.save('out.png')
     Img.close()
