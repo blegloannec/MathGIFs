@@ -14,10 +14,13 @@ def pascal(size, depth=2, mod=2):
     T = [[0]*size]
     T[0][0] = 1
     for n in range(1,size):
-        L = [0]*size
-        L[0] = 1
+        L0 = T[n-1][:]
         for k in range(1,n+1):
-            L[k] = sum(T[-1][j] for j in range(max(0,k-depth+1),k+1)) % mod
+            L0[k] += L0[k-1]
+            #L0[k] %= mod
+        L = [0]*size
+        for k in range(n+1):
+            L[k] = (L0[k] - (L0[k-depth] if k-depth>=0 else 0)) % mod
         T.append(L)
     Col = [randcol() for _ in range(mod)]
     Col[0] = BackCol
