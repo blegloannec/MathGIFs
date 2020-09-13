@@ -56,8 +56,8 @@ def tree(cosa, sina, n=12, aux=aux_full):
     return surf
 
 def main():
-    d = 12
-    aux = aux_hollow
+    d = 13
+    aux = aux_full
     n = 100
     for i in range(n):
         a = math.pi/2. * i/n
