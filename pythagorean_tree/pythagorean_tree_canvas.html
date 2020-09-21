@@ -1,0 +1,149 @@
+<html>
+  <meta charset="UTF-8">
+  <head>
+    <title>Arbre Pythagoricien</title>
+    <style>
+      body {
+	  font-family: sans-serif;
+      }
+      input[type=button] {
+	  padding: 5px;
+	  margin: auto 5px;
+      }
+      table {
+	  padding: 10px;
+      }
+    </style>
+    <script type="text/javascript">
+      function TreeAnim(canvas, depth) {
+	  this.W = canvas.width;
+	  this.H = canvas.height;
+	  this.ctx = canvas.getContext("2d");
+	  this.depth = depth;
+	  this.max_angle = 90;
+	  
+	  this.angle = 0;
+	  this.interval = null;
+	  
+	  this.running = function() {
+	      return this.interval !== null;
+	  }
+	  
+	  this.draw = function() {
+	      this.ctx.clearRect(0, 0, this.W, this.H);
+	      const a = Math.PI/2 * this.angle/this.max_angle;
+	      const cosa = Math.cos(a), sina = Math.sin(a);
+	      const self = this;
+	      
+	      function aux(n, xa,ya, xb,yb) {
+		  if (n<0) return;
+		  var dx = xb-xa, dy = yb-ya;
+		  var xc = xa-dy, yc = ya+dx;
+		  var xd = xc + cosa*(cosa*dx-sina*dy), yd = yc + cosa*(sina*dx+cosa*dy);
+		  var xe = xb-dy, ye = yb+dx;
+		  self.ctx.beginPath();
+		  self.ctx.moveTo(xa, self.H-ya);
+		  self.ctx.lineTo(xb, self.H-yb);
+		  self.ctx.lineTo(xe, self.H-ye);
+		  self.ctx.lineTo(xc, self.H-yc);
+		  self.ctx.closePath();
+		  self.ctx.fillStyle = "rgb(0, " + (255-200*n/self.depth) + ", 0)";
+		  self.ctx.fill();
+		  aux(n-1, xc,yc, xd,yd);
+		  aux(n-1, xd,yd, xe,ye);
+	      }
+	      
+	      aux(this.depth, 5/11*this.W,this.H/6, 6/11*this.W,this.H/6);
+	  }
+	  
+	  this.setDepth = function(d) {
+	      this.depth = parseInt(d);
+	      if (!this.running()) this.draw();
+	  }
+	  
+	  this.setAngle = function(a) {
+	      this.angle = parseInt(a);
+	      if (!this.running()) this.draw();
+	  }
+	  
+	  this.step = function() {
+	      this.draw();
+	      this.angle = (this.angle + 1) % this.max_angle;
+	  }
+	  
+	  this.run = function() {
+	      if (!this.running()) {
+		  const self = this;
+		  this.interval = setInterval(function() { self.step(); }, 60);
+	      }
+	  }
+	  
+	  this.stop = function() {
+	      if (this.running()) {
+		  clearInterval(this.interval);
+		  this.interval = null;
+	      }
+	  }
+      }
+      
+      var tree;
+      
+      function init() {
+	  const canvas = document.getElementById("canvas_surface");
+	  const depth = document.getElementById("input_depth").value;
+	  tree = new TreeAnim(canvas, depth);
+	  run_anim();
+      }
+      
+      // inputs
+      function run_anim() {
+	  document.getElementById("input_angle").disabled = true;
+	  document.getElementById("button_run").disabled = true;
+	  document.getElementById("button_stop").disabled = false;
+	  tree.run();
+      }
+      
+      function stop_anim() {
+	  tree.stop();
+	  document.getElementById("input_angle").value = tree.angle;
+	  document.getElementById("angle_label").innerHTML = tree.angle;
+	  document.getElementById("input_angle").disabled = false;
+	  document.getElementById("button_run").disabled = false;
+	  document.getElementById("button_stop").disabled = true;
+      }
+      
+      function depth_change(val) {
+	  document.getElementById("depth_label").innerHTML = val;
+	  tree.setDepth(val);
+      }
+      
+      function angle_change(val) {
+	  document.getElementById("angle_label").innerHTML = val;
+	  tree.setAngle(val);
+      }
+    </script>
+  </head>
+  <body onload="init()">
+    <canvas id="canvas_surface" width="800" height="600">
+    </canvas>
+    <table>
+      <tr>
+	<td><b>Animation</b></td>
+	<td>
+	  <input id="button_run" type="button" value="⏵ Jouer" onclick="run_anim()" />
+	  <input id="button_stop" type="button" value="⏹ Stop" onclick="stop_anim()" />
+	</td>
+      </tr>
+      <tr>
+	<td><b>Profondeur</b></td>
+	<td><input id="input_depth" type="range" value="10" min="1" max="15" oninput="depth_change(this.value)" /></td>
+	<td><span id="depth_label">10</span></td>
+      </tr>
+      <tr>
+	<td><b>Angle ∡</b></td>
+	<td><input id="input_angle" type="range" value="0" min="0" max="90" oninput="angle_change(this.value)" /></td>
+	<td><span id="angle_label">0</span></td>
+      </tr>
+    </table>
+  </body>
+</html>
