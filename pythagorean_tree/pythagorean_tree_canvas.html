@@ -13,16 +13,19 @@
       table {
 	  padding: 10px;
       }
+      canvas {
+	  border: thin solid lightgray;
+      }
     </style>
     <script type="text/javascript">
       function TreeAnim(canvas, depth) {
-	  this.W = canvas.width;
-	  this.H = canvas.height;
-	  this.ctx = canvas.getContext("2d");
+	  this.canvas = canvas;
+	  this.ctx = this.canvas.getContext("2d");
 	  this.depth = depth;
 	  this.max_angle = 90;
 	  
 	  this.angle = 0;
+	  this.fill = false;
 	  this.interval = null;
 	  
 	  this.running = function() {
@@ -30,7 +33,8 @@
 	  }
 	  
 	  this.draw = function() {
-	      this.ctx.clearRect(0, 0, this.W, this.H);
+	      const W = this.canvas.width, H = this.canvas.height;
+	      this.ctx.clearRect(0, 0, W, H);
 	      const a = Math.PI/2 * this.angle/this.max_angle;
 	      const cosa = Math.cos(a), sina = Math.sin(a);
 	      const self = this;
@@ -42,10 +46,11 @@
 		  var xd = xc + cosa*(cosa*dx-sina*dy), yd = yc + cosa*(sina*dx+cosa*dy);
 		  var xe = xb-dy, ye = yb+dx;
 		  self.ctx.beginPath();
-		  self.ctx.moveTo(xa, self.H-ya);
-		  self.ctx.lineTo(xb, self.H-yb);
-		  self.ctx.lineTo(xe, self.H-ye);
-		  self.ctx.lineTo(xc, self.H-yc);
+		  self.ctx.moveTo(xa, H-ya);
+		  self.ctx.lineTo(xb, H-yb);
+		  self.ctx.lineTo(xe, H-ye);
+		  if (self.fill) self.ctx.lineTo(xd, H-yd);
+		  self.ctx.lineTo(xc, H-yc);
 		  self.ctx.closePath();
 		  self.ctx.fillStyle = "rgb(0, " + (255-200*n/self.depth) + ", 0)";
 		  self.ctx.fill();
@@ -53,19 +58,28 @@
 		  aux(n-1, xd,yd, xe,ye);
 	      }
 	      
-	      aux(this.depth, 5/11*this.W,this.H/6, 6/11*this.W,this.H/6);
+	      aux(this.depth, 5/11*W,H/7, 6/11*W,H/7);
+	  }
+
+	  this.update = function() {
+	      if (!this.running()) this.draw();
 	  }
 	  
 	  this.setDepth = function(d) {
 	      this.depth = parseInt(d);
-	      if (!this.running()) this.draw();
+	      this.update();
 	  }
 	  
 	  this.setAngle = function(a) {
 	      this.angle = parseInt(a);
-	      if (!this.running()) this.draw();
+	      this.update();
 	  }
-	  
+
+	  this.setFill = function(f) {
+	      this.fill = f;
+	      this.update();
+	  }
+
 	  this.step = function() {
 	      this.draw();
 	      this.angle = (this.angle + 1) % this.max_angle;
@@ -106,7 +120,7 @@
       function stop_anim() {
 	  tree.stop();
 	  document.getElementById("input_angle").value = tree.angle;
-	  document.getElementById("angle_label").innerHTML = tree.angle;
+	  document.getElementById("angle_label").innerHTML = tree.angle + "°";
 	  document.getElementById("input_angle").disabled = false;
 	  document.getElementById("button_run").disabled = false;
 	  document.getElementById("button_stop").disabled = true;
@@ -118,31 +132,55 @@
       }
       
       function angle_change(val) {
-	  document.getElementById("angle_label").innerHTML = val;
+	  document.getElementById("angle_label").innerHTML = val + "°";
 	  tree.setAngle(val);
+      }
+
+      function fill_change(fill) {
+	  tree.setFill(fill);
+      }
+
+      function width_input(w) {
+	  document.getElementById("width_label").innerHTML = w + "px";
+      }
+      
+      function width_change(w) {
+	  const ratio = 16/9;
+	  tree.canvas.width = w;
+	  tree.canvas.height = Math.round(w / ratio);
+	  tree.update();
       }
     </script>
   </head>
   <body onload="init()">
-    <canvas id="canvas_surface" width="800" height="600">
+    <canvas id="canvas_surface" width="1280" height="720">
     </canvas>
     <table>
       <tr>
 	<td><b>Animation</b></td>
 	<td>
-	  <input id="button_run" type="button" value="⏵ Jouer" onclick="run_anim()" />
-	  <input id="button_stop" type="button" value="⏹ Stop" onclick="stop_anim()" />
+	  <input id="button_run" type="button" value="⏵ Jouer" onclick="run_anim()">
+	  <input id="button_stop" type="button" value="⏹ Stop" onclick="stop_anim()">
 	</td>
       </tr>
       <tr>
 	<td><b>Profondeur</b></td>
-	<td><input id="input_depth" type="range" value="10" min="1" max="15" oninput="depth_change(this.value)" /></td>
+	<td><input id="input_depth" type="range" value="10" min="1" max="15" oninput="depth_change(this.value)"></td>
 	<td><span id="depth_label">10</span></td>
       </tr>
       <tr>
 	<td><b>Angle ∡</b></td>
-	<td><input id="input_angle" type="range" value="0" min="0" max="90" oninput="angle_change(this.value)" /></td>
-	<td><span id="angle_label">0</span></td>
+	<td><input id="input_angle" type="range" value="0" min="0" max="90" oninput="angle_change(this.value)"></td>
+	<td><span id="angle_label">0°</span></td>
+      </tr>
+      <tr>
+	<td><b>Remplir ?</b></td>
+	<td><input id="input_fill" type="checkbox" onchange="fill_change(this.checked)"></td>
+      </tr>
+      <tr>
+	<td><b>Largeur</b></td>
+	<td><input id="input_width" type="range" value="1280" min="200" max="2000" step="10" oninput="width_input(this.value)" onchange="width_change(this.value)"></td>
+	<td><span id="width_label">1280px</span></td>
       </tr>
     </table>
   </body>
