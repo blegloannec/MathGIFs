@@ -5,16 +5,19 @@ import numpy as np
 import math, os, random
 random.seed()
 
+randcol = lambda: tuple(random.randint(0,255) for _ in range(3))
+
 
 class MandelImg:
-    def __init__(self, xc=0., yc=0., r=2., size=500, iterations=150):
-        self.size = size
-        self.itmax = iterations
+    def __init__(self, x1=-2.,y1=-2., x2=2.,y2=2., width=500,height=500, iterations=50):
+        self.width  = width
+        self.height = height
+        self.itmax  = iterations
         C = []
-        for iy in range(size-1,-1,-1):
-            y = 2.*r*iy/size + yc-r
-            for ix in range(size):
-                x = 2.*r*ix/size + xc-r  # interval [xc-r,xc+r]
+        for iy in range(self.height-1,-1,-1):
+            y = ((self.height-iy)*y1 + iy*y2) / self.height
+            for ix in range(self.width):
+                x = ((self.width-ix)*x1 + ix*x2) / self.width
                 C.append(complex(x,y))
         C = np.array(C)
         c0 = complex(0)
@@ -30,20 +33,26 @@ class MandelImg:
     
     def gray(self):
         Data = 255*(self.itmax-self.Iter) // self.itmax
-        Img = Image.new('L', (self.size,self.size))
+        Img = Image.new('L', (self.width,self.height))
         Img.putdata(Data)
         return Img
     
-    def rgb(self, nbcol=5):
-        randcol = lambda: tuple(random.randint(0,255) for _ in range(3))
-        MainCol = [randcol() for _ in range(nbcol+1)]
+    def rgb(self, colors=None):
+        if isinstance(colors, int):
+            nbcol = colors
+            MainCol = [randcol() for _ in range(nbcol+1)]
+        elif colors is None:
+            nbcol = min(2, self.itmax // 20)
+            MainCol = [randcol() for _ in range(nbcol+1)]
+        else:
+            MainCol = colors
         stripe = (self.itmax+nbcol-1) // nbcol
         FullCol = []
         for i in range(self.itmax+1):
             q,r = divmod(i, stripe)
             col = tuple(((stripe-r)*a+r*b)//stripe for a,b in zip(MainCol[q-1],MainCol[q]))
             FullCol.append(col)
-        Img = Image.new('RGB', (self.size,self.size))
+        Img = Image.new('RGB', (self.width,self.height))
         Img.putdata([FullCol[i] for i in self.Iter])
         return Img
 
@@ -57,7 +66,7 @@ def mandel_zoom(x, y, r, frames=100):
         t = a/frames
         r1 = math.exp(lr0*(1.-t) + lr*t)
         it = round(100*(1.-math.log(r1,100)))
-        Img = MandelImg(x,y,r1,iterations=it).gray()
+        Img = MandelImg(x-r1,y-r1, x+r1,y+r1, iterations=it).gray()
         Img.save('/tmp/frame%03d.gif' % a)
         Img.close()
     #os.system('convert -loop 0 -delay 10 /tmp/frame*.gif anim.gif')
@@ -67,5 +76,6 @@ def mandel_zoom(x, y, r, frames=100):
 
 if __name__=='__main__':
     x,y = 0.01605,-0.8205
-    MandelImg(x,y,0.05).rgb().save('out.png')
+    r = 0.05
+    MandelImg(x-r,y-r, x+r,y+r, iterations=150).rgb(3).save('out.png')
     #mandel_zoom(x,y,0.001)
