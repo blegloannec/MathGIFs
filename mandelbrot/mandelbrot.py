@@ -5,7 +5,7 @@ import numpy as np
 import math, os, random
 random.seed()
 
-randcol = lambda: tuple(random.randint(0,255) for _ in range(3))
+randcol = lambda: tuple(random.randint(100,255) for _ in range(3))
 
 
 class MandelImg:
@@ -20,6 +20,9 @@ class MandelImg:
                 x = ((self.width-ix)*x1 + ix*x2) / self.width
                 C.append(complex(x,y))
         C = np.array(C)
+        self.compute_filter(C)
+    
+    def compute(self, C):
         c0 = complex(0)
         Z = np.array([c0]*C.size)
         self.Iter = np.array([self.itmax]*C.size)
@@ -30,6 +33,21 @@ class MandelImg:
             Z = np.where(Over, c0, Z)
             C = np.where(Over, c0, C)
             self.Iter = np.where(Over, i, self.Iter)
+    
+    # faster version using filtering
+    def compute_filter(self, C):        
+        Z = np.array([complex(0)]*C.size)
+        Idx = np.arange(C.size)
+        self.Iter = np.array([self.itmax]*C.size)
+        for i in range(self.itmax):
+            Z *= Z
+            Z += C
+            Keep = np.abs(Z) <= 2.
+            for iz in Idx[~Keep]:
+                self.Iter[iz] = i
+            Z = Z[Keep]
+            Idx = Idx[Keep]
+            C = C[Keep]
     
     def gray(self):
         Data = 255*(self.itmax-self.Iter) // self.itmax
@@ -77,5 +95,5 @@ def mandel_zoom(x, y, r, frames=100):
 if __name__=='__main__':
     x,y = 0.01605,-0.8205
     r = 0.05
-    MandelImg(x-r,y-r, x+r,y+r, iterations=150).rgb(3).save('out.png')
+    MandelImg(x-r,y-r, x+r,y+r, iterations=200).rgb(3).save('out.png')
     #mandel_zoom(x,y,0.001)
