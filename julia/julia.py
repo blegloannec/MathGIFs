@@ -47,7 +47,7 @@ def np_julia_img0(c, size=500, iterations=50):
     return Img
 
 # faster version using filtering
-def np_julia_img(C, size=200, iterations=50):
+def np_julia_img(C, size=500, iterations=50):
     Z = []
     for iy in range(size-1,-1,-1):
         y = 4.*iy/size-2.        
@@ -89,5 +89,5 @@ if __name__=='__main__':
     c = complex(-0.7885,0)
     #c = complex(random.random(), random.random())
     print(c)
-    #np_julia_img2(c).save('out.png')
+    #np_julia_img(c).save('out.png')
     julia_anim(c)

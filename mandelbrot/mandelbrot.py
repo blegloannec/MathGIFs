@@ -68,7 +68,7 @@ class MandelImg:
         FullCol = []
         for i in range(self.itmax+1):
             q,r = divmod(i, stripe)
-            col = tuple(((stripe-r)*a+r*b)//stripe for a,b in zip(MainCol[q-1],MainCol[q]))
+            col = tuple(((stripe-1-r)*a+r*b)//(stripe-1) for a,b in zip(MainCol[q-1],MainCol[q]))
             FullCol.append(col)
         Img = Image.new('RGB', (self.width,self.height))
         Img.putdata([FullCol[i] for i in self.Iter])
