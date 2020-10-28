@@ -28,7 +28,7 @@ class NewtonImg:
         self.compute_filter()
     
     def compute(self):
-        self.Iter = np.array([0]*self.Z.size)
+        self.Iter = np.zeros(self.Z.size)
         for i in range(1,self.itmax+1):
             self.Z -= np.polyval(self.P, self.Z) / np.polyval(self.DP, self.Z)
             PZ = np.polyval(self.P, self.Z)
@@ -39,7 +39,7 @@ class NewtonImg:
     def compute_filter(self):
         Zf = self.Z.copy()
         Idx = np.arange(self.Z.size)
-        self.Iter = np.array([self.itmax]*self.Z.size)
+        self.Iter = np.full(self.Z.size, self.itmax)
         for i in range(self.itmax):
             Zf -= np.polyval(self.P, Zf) / np.polyval(self.DP, Zf)            
             PZ = np.polyval(self.P, Zf)
@@ -64,7 +64,7 @@ class NewtonImg:
             assert len(colors) >= self.Roots.size
         Dist = np.array([np.abs(self.Z-r) for r in self.Roots])
         Data = np.argmin(Dist, axis=0)
-        RGB = [np.array([colors[c][i] for c in Data]) for i in range(3)]
+        RGB = np.array([[colors[c][i] for c in Data] for i in range(3)])
         RGB = RGB * (self.itmax - self.Iter) // self.itmax
         Img = Image.new('RGB', (self.width, self.height))
         Data = list(zip(*RGB))
@@ -96,7 +96,7 @@ if __name__=='__main__':
     #P = (1, 0, 0, 0, -1)
     #P = (1, 0, -2, 2)  # example with non converging areas
     #P = (1, 0, 0, 0, 15, 0, 0, 0, -16)
-    #P = (1, 0 ,-300, -3000)
+    P = (1, 0 ,-300, -3000)
     #P = tuple([1]+[random.randint(-5,5) for _ in range(3)])
     #Colors = [(255,100,100), (100,255,100), (100,100,255)]
     Colors = [(100,170,200), (240,240,215), (192,215,192)]

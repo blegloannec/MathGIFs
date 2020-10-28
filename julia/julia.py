@@ -32,8 +32,8 @@ def np_julia_img0(c, size=500, iterations=50):
             x = 4.*ix/size-2.  # interval [-2,2]
             Z.append(complex(x,y))
     Z = np.array(Z)
-    I = np.array([iterations]*Z.size)
-    C = np.array([c]*Z.size)
+    I = np.full(Z.size, iterations)
+    C = np.full(Z.size, c)
     c0 = complex(0)
     for i in range(iterations):
         Z *= Z
@@ -56,7 +56,7 @@ def np_julia_img(C, size=500, iterations=50):
             Z.append(complex(x,y))
     Z = np.array(Z)
     Idx = np.arange(Z.size)
-    Iter = np.array([iterations]*Z.size)
+    Iter = np.full(Z.size, iterations)
     c0 = complex(0)
     for i in range(iterations):
         Z *= Z

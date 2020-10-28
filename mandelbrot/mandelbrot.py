@@ -24,8 +24,8 @@ class MandelImg:
     
     def compute(self, C):
         c0 = complex(0)
-        Z = np.array([c0]*C.size)
-        self.Iter = np.array([self.itmax]*C.size)
+        Z = np.full(C.size, c0)
+        self.Iter = np.full(C.size, self.itmax)
         for i in range(self.itmax):
             Z *= Z
             Z += C
@@ -36,9 +36,9 @@ class MandelImg:
     
     # faster version using filtering
     def compute_filter(self, C):        
-        Z = np.array([complex(0)]*C.size)
+        Z = np.full(C.size, complex(0))
         Idx = np.arange(C.size)
-        self.Iter = np.array([self.itmax]*C.size)
+        self.Iter = np.full(C.size, self.itmax)
         for i in range(self.itmax):
             Z *= Z
             Z += C
