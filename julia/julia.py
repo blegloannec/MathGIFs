@@ -2,7 +2,7 @@
 
 import numpy as np
 from PIL import Image
-import cmath, os, random
+import cmath, subprocess, random
 random.seed()
 
 
@@ -73,14 +73,13 @@ def np_julia_img(C, size=500, iterations=50):
 
 # Anim.
 def julia_anim(c, frames=150):
-    #os.system('rm /tmp/frame*.gif')
     for a in range(frames):
         ca = c * cmath.rect(1., cmath.tau*a/frames)
         Img = np_julia_img(ca)
         Img.save('/tmp/frame%04d.gif' % a)
-    #os.system('convert -loop 0 -delay 5 /tmp/frame*.gif anim.gif')
-    os.system('gifsicle -O3 -l -d5 /tmp/frame*.gif > anim.gif')
-    os.system('rm /tmp/frame*.gif')
+    #subprocess.run('convert -loop 0 -delay 5 /tmp/frame*.gif anim.gif', shell=True)
+    subprocess.run('gifsicle -O3 -l -d5 /tmp/frame*.gif > anim.gif', shell=True)
+    subprocess.run('rm /tmp/frame*.gif', shell=True)
 
 
 # MAIN

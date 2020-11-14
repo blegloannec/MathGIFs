@@ -2,7 +2,7 @@
 
 import numpy as np
 from PIL import Image
-import os, random
+import subprocess, random
 random.seed()
 
 EPS = 1e-6
@@ -86,8 +86,8 @@ def newton_anim(P1, P2, frames=50, x0=0.,radius=5., size=601, iterations=30, col
         P = ((frames-1-t)*P1 + t*P2) / (frames-1)
         Img = NewtonImg(P, x0-radius,-radius, x0+radius,radius, size,size, iterations).rgb(colors)
         Img.save('/tmp/frame%04d.gif' % t)
-    os.system('gifsicle -O3 -l -d15 /tmp/frame*.gif > anim.gif')
-    os.system('rm -f /tmp/frame*.gif')
+    subprocess.run('gifsicle -O3 -l -d15 /tmp/frame*.gif > anim.gif', shell=True)
+    subprocess.run('rm -f /tmp/frame*.gif', shell=True)
 
 
 # MAIN
